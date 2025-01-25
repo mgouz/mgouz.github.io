@@ -3,7 +3,7 @@ name: Publish Website
 on:
     push:
         branches:
-            main
+           - main
 
 
 jobs:
@@ -12,10 +12,13 @@ jobs:
         steps:
             - name: Check out
               uses: actions/checkout@v1
+
             - name: Install Emacs
               uses: sudo apt install emacs-nox --yes
+
             - name: Build the Site
               uses: ./build.sh
+              
             - name: Publish Generated Content 
               uses: JamesIves/github-pages-deploy-action@4.1.4
               with:
