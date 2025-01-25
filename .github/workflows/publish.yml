@@ -17,7 +17,7 @@ jobs:
             - name: Build the Site
               uses: ./build.sh
             - name: Publish Generated Content 
-              uses: JamesIves/github-pages-deploy-action@4.14
+              uses: JamesIves/github-pages-deploy-action@4.1.4
               with:
                 branch: gh-pages
                 folder: public 
