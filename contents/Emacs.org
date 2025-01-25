@@ -1,0 +1,14 @@
+#+title: Hello world
+#+begin_src C
+  #include <stdio.h>
+
+  int main()
+  {
+    printf("hello world!");
+    return 0;
+  }
+
+#+end_src
+
+#+RESULTS:
+: hello world!
