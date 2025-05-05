@@ -1,20 +1,10 @@
-#+title: My Org Website 
+#+title: matthew's blog 
+# #+date: Mon May  5 18:27:31 EDT 2025
 
-* TODO Overview
-:PROPERTEIS:
-This is something I want hidden
-:END:
-Hi There! How are you! 
+* about-me
+Hi there! My name's Matthew and I'm a software engineer.  I primarily have worked in web development building full stack applications, but have also done work in machine learning and building data pipelines.
+My personal programming interests revolve around compiler design and operating systems.  I enjoy running, reading, creating art, and doing more programming in my free time. 
 
-
-
-
-
-* Main Body
-Hey! Check out my other [[./Emacs.org][page!]]
-
-| Id | Description             |
-|----+-------------------------|
-|  0 | Testing for something  Te |
-|  1 | Something else          |
-|    |                         |
+* blog
++ Coming soon... 
+  
