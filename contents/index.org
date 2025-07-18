@@ -7,4 +7,16 @@ My personal programming interests revolve around compiler design and operating s
 
 * blog
 + Coming soon... 
+
+
+#+BEGIN_EXPORT html
+<div style="display: flex; gap: 5rem;">
+  <a href="https://www.linkedin.com/in/mgouz/">
+    <img src="../assets/linkedin-svgrepo-com.svg" alt="Logo" style="width:100px;height:auto;" />
+  </a>
+  <a href="https://github.com/mgouz/">
+    <img src="../assets/github-mark.svg" alt="Logo" style="width:100px;height:auto;" />
+  </a>
+</div>
+#+END_EXPORT
   
