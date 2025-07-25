@@ -3,7 +3,8 @@
     "dev": "deno run -A npm:next dev",
     "build": "deno run -A npm:next build",
     "test": "deno test",
-    "lint": "deno lint"
+    "lint": "deno lint",
+    "export": "deno run -A npm:next export",
   },
   "imports": {
     "@tailwindcss/postcss": "npm:@tailwindcss/postcss@^4.1.11",
