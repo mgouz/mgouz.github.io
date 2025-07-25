@@ -4,3 +4,4 @@ node_modules/
 .next/
 .DS_STORE
 *.tsbuildinfo
+out/
