@@ -4,7 +4,6 @@ export function getTheme(): 'dark' | '' {
     if (theme !== null ) {
       return theme as 'dark' | '';
     }
-    debugger;
 
     theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : ''
     localStorage.setItem('theme', theme)
