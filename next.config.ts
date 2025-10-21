@@ -7,6 +7,8 @@ const nextConfig: NextConfig = {
    *
    * @see https://nextjs.org/docs/app/api-reference/next-config-js/basePath
    */
+    productionBrowserSourceMaps: true,
+
   typescript: {
     // !! WARN !!
     // Dangerously allow production builds to successfully complete even if

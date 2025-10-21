@@ -1,9 +1,10 @@
 {
   "tasks": {
-    "dev": "deno run -A npm:next dev",
+    "dev": "OTEL_DENO=true deno run  -A npm:next dev",
     "build": "deno run -A npm:next build",
     "test": "deno test",
     "lint": "deno lint",
+    "size": "size-limit",
     "export": "deno run -A npm:next export",
   },
   "imports": {
@@ -21,6 +22,7 @@
     "postcss": "npm:postcss@^8.5.3",
     "react": "npm:react@^19.1.0",
     "react-dom": "npm:react-dom@^19.1.0",
+    "size-limit": "npm:size-limit@^11.2.0",
     "sugar-high": "npm:sugar-high@^0.9.3",
     "tailwindcss": "npm:tailwindcss@^4.1.5",
     "typescript": "npm:typescript@^5.8.3"
