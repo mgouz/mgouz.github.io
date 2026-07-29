@@ -2,35 +2,17 @@ import { useState, useEffect } from "react";
 import { marked } from "marked";
 import "./index.css";
 
-type ArticleSummary = {
-  slug: string;
-  title: string;
-  date: string;
-  blurb: string;
-};
+import type { Article } from "./articles";
 
-type ArticleFull = {
-  slug: string;
-  title: string;
-  date: string;
-  content: string;
-};
-
-function useArticles() {
-  const [articles, setArticles] = useState<ArticleSummary[]>([]);
-  useEffect(() => {
-    fetch("/api/articles")
-      .then((r) => r.json())
-      .then(setArticles);
-  }, []);
-  return articles;
+declare global {
+  var __ARTICLES__: Article[];
 }
 
 function ArticleList({
   articles,
   onSelect,
 }: {
-  articles: ArticleSummary[];
+  articles: Article[];
   onSelect: (slug: string) => void;
 }) {
   return (
@@ -51,22 +33,12 @@ function ArticleList({
 }
 
 function ArticleView({
-  slug,
+  article,
   onBack,
 }: {
-  slug: string;
+  article: Article;
   onBack: () => void;
 }) {
-  const [article, setArticle] = useState<ArticleFull | null>(null);
-
-  useEffect(() => {
-    fetch(`/api/articles/${slug}`)
-      .then((r) => r.json())
-      .then(setArticle);
-  }, [slug]);
-
-  if (!article) return <main className="content" />;
-
   const html = marked.parse(article.content) as string;
 
   return (
@@ -77,14 +49,27 @@ function ArticleView({
       <article className="article-full">
         <time className="entry-date">{article.date}</time>
         <h1 className="article-title">{article.title}</h1>
-        <div className="article-body" dangerouslySetInnerHTML={{ __html: html }} />
+        <div
+          className="article-body"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
       </article>
     </main>
   );
 }
 
 export function App() {
-  const articles = useArticles();
+  const [articles, setArticles] = useState<Article[]>(
+    globalThis.__ARTICLES__ ?? []
+  );
+
+  useEffect(() => {
+    if (!globalThis.__ARTICLES__) {
+      fetch("/articles.json")
+        .then((r) => r.json())
+        .then(setArticles);
+    }
+  }, []);
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
 
   useEffect(() => {
@@ -104,17 +89,27 @@ export function App() {
   };
 
   const goBack = () => {
-    history.pushState(null, "", "/");
+    history.pushState(null, "", location.pathname);
     setActiveSlug(null);
     window.scrollTo(0, 0);
   };
+
+  const active = activeSlug
+    ? articles.find((a) => a.slug === activeSlug) ?? null
+    : null;
 
   return (
     <div className="site">
       <aside className="sidebar">
         <div className="sidebar-content">
           <h1 className="site-title">
-            <a href="/" onClick={(e) => { e.preventDefault(); goBack(); }}>
+            <a
+              href="/"
+              onClick={(e) => {
+                e.preventDefault();
+                goBack();
+              }}
+            >
               matthew's blog
             </a>
           </h1>
@@ -123,18 +118,26 @@ export function App() {
             some of it here.
           </p>
           <nav className="links">
-            <a href="https://github.com/mgouz" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://github.com/mgouz"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               github
             </a>
-            <a href="https://linkedin.com/in/" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://linkedin.com/in/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               linkedin
             </a>
             <a href="mailto:matt@example.com">email</a>
           </nav>
         </div>
       </aside>
-      {activeSlug ? (
-        <ArticleView slug={activeSlug} onBack={goBack} />
+      {active ? (
+        <ArticleView article={active} onBack={goBack} />
       ) : (
         <ArticleList articles={articles} onSelect={openArticle} />
       )}
