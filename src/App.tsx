@@ -1,34 +1,126 @@
+import { useState, useEffect } from "react";
+import { marked } from "marked";
 import "./index.css";
 
-const articles = [
-  {
-    title: "On the Nature of Attention",
-    date: "2026-07-20",
-    blurb:
-      "What does it mean to pay attention in an age of infinite distraction? I've been thinking about this through the lens of Simone Weil, who believed attention was the rarest form of generosity.",
-  },
-  {
-    title: "Cathedral Thinking",
-    date: "2026-06-15",
-    blurb:
-      "The builders of medieval cathedrals knew they would never see the finished work. There's something in that disposition worth recovering — especially in how we build software.",
-  },
-  {
-    title: "Notes on Icons and Interfaces",
-    date: "2026-05-28",
-    blurb:
-      "The Orthodox icon tradition has a theory of images that feels surprisingly relevant to interaction design. An icon is not a picture of something — it's a window into something.",
-  },
-];
+type ArticleSummary = {
+  slug: string;
+  title: string;
+  date: string;
+  blurb: string;
+};
+
+type ArticleFull = {
+  slug: string;
+  title: string;
+  date: string;
+  content: string;
+};
+
+function useArticles() {
+  const [articles, setArticles] = useState<ArticleSummary[]>([]);
+  useEffect(() => {
+    fetch("/api/articles")
+      .then((r) => r.json())
+      .then(setArticles);
+  }, []);
+  return articles;
+}
+
+function ArticleList({
+  articles,
+  onSelect,
+}: {
+  articles: ArticleSummary[];
+  onSelect: (slug: string) => void;
+}) {
+  return (
+    <main className="content">
+      {articles.map((a) => (
+        <article
+          key={a.slug}
+          className="entry"
+          onClick={() => onSelect(a.slug)}
+        >
+          <time className="entry-date">{a.date}</time>
+          <h2 className="entry-title">{a.title}</h2>
+          <p className="entry-blurb">{a.blurb}</p>
+        </article>
+      ))}
+    </main>
+  );
+}
+
+function ArticleView({
+  slug,
+  onBack,
+}: {
+  slug: string;
+  onBack: () => void;
+}) {
+  const [article, setArticle] = useState<ArticleFull | null>(null);
+
+  useEffect(() => {
+    fetch(`/api/articles/${slug}`)
+      .then((r) => r.json())
+      .then(setArticle);
+  }, [slug]);
+
+  if (!article) return <main className="content" />;
+
+  const html = marked.parse(article.content) as string;
+
+  return (
+    <main className="content">
+      <button className="back-link" onClick={onBack}>
+        &larr; back
+      </button>
+      <article className="article-full">
+        <time className="entry-date">{article.date}</time>
+        <h1 className="article-title">{article.title}</h1>
+        <div className="article-body" dangerouslySetInnerHTML={{ __html: html }} />
+      </article>
+    </main>
+  );
+}
 
 export function App() {
+  const articles = useArticles();
+  const [activeSlug, setActiveSlug] = useState<string | null>(null);
+
+  useEffect(() => {
+    const onPopState = () => {
+      const slug = location.hash.replace("#/", "") || null;
+      setActiveSlug(slug);
+    };
+    window.addEventListener("popstate", onPopState);
+    onPopState();
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  const openArticle = (slug: string) => {
+    history.pushState(null, "", `#/${slug}`);
+    setActiveSlug(slug);
+    window.scrollTo(0, 0);
+  };
+
+  const goBack = () => {
+    history.pushState(null, "", "/");
+    setActiveSlug(null);
+    window.scrollTo(0, 0);
+  };
+
   return (
     <div className="site">
       <aside className="sidebar">
         <div className="sidebar-content">
-          <h1 className="site-title">matthew's blog</h1>
+          <h1 className="site-title">
+            <a href="/" onClick={(e) => { e.preventDefault(); goBack(); }}>
+              matthew's blog
+            </a>
+          </h1>
           <p className="bio">
-            interested in tech, philosophy, art, and religion. I write about some of it here.
+            interested in tech, philosophy, art, and religion. I write about
+            some of it here.
           </p>
           <nav className="links">
             <a href="https://github.com/mgouz" target="_blank" rel="noopener noreferrer">
@@ -41,15 +133,11 @@ export function App() {
           </nav>
         </div>
       </aside>
-      <main className="content">
-        {articles.map((article) => (
-          <article key={article.title} className="entry">
-            <time className="entry-date">{article.date}</time>
-            <h2 className="entry-title">{article.title}</h2>
-            <p className="entry-blurb">{article.blurb}</p>
-          </article>
-        ))}
-      </main>
+      {activeSlug ? (
+        <ArticleView slug={activeSlug} onBack={goBack} />
+      ) : (
+        <ArticleList articles={articles} onSelect={openArticle} />
+      )}
     </div>
   );
 }
