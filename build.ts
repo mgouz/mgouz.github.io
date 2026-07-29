@@ -1,8 +1,9 @@
 #!/usr/bin/env bun
 import plugin from "bun-plugin-tailwind";
 import { existsSync } from "fs";
-import { rm } from "fs/promises";
+import { rm, writeFile } from "fs/promises";
 import path from "path";
+import { loadArticles } from "./src/articles";
 
 if (process.argv.includes("--help") || process.argv.includes("-h")) {
   console.log(`
@@ -117,9 +118,16 @@ if (existsSync(outdir)) {
 
 const start = performance.now();
 
-const entrypoints = [...new Bun.Glob("**.html").scanSync("src")]
-  .map(a => path.resolve("src", a))
-  .filter(dir => !dir.includes("node_modules"));
+// Inject article data into HTML before bundling
+const articles = await loadArticles();
+const articlesScript = `<script>globalThis.__ARTICLES__=${JSON.stringify(articles)}</script>`;
+const indexHtmlPath = path.resolve("src", "index.html");
+const indexHtml = await Bun.file(indexHtmlPath).text();
+const injectedHtml = indexHtml.replace("<!--ARTICLES-->", articlesScript);
+const tmpHtml = path.resolve("src", "_index.gen.html");
+await writeFile(tmpHtml, injectedHtml);
+
+const entrypoints = [tmpHtml];
 console.log(`📄 Found ${entrypoints.length} HTML ${entrypoints.length === 1 ? "file" : "files"} to process\n`);
 
 const result = await Bun.build({
@@ -146,4 +154,14 @@ const outputTable = result.outputs.map(output => ({
 console.table(outputTable);
 const buildTime = (end - start).toFixed(2);
 
-console.log(`\n✅ Build completed in ${buildTime}ms\n`);
+// Rename generated HTML to index.html in output
+const genOutput = path.join(outdir, "_index.gen.html");
+if (existsSync(genOutput)) {
+  await Bun.write(path.join(outdir, "index.html"), Bun.file(genOutput));
+  await rm(genOutput);
+}
+
+// Clean up temp file
+await rm(tmpHtml, { force: true });
+
+console.log(`\n Build completed in ${buildTime}ms\n`);
